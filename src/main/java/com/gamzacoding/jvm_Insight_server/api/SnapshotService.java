@@ -1,6 +1,6 @@
 package com.gamzacoding.jvm_Insight_server.api;
 
-import com.gamzacoding.jvm_Insight_server.controller.SnapshotController;
+import com.gamzacoding.jvm_Insight_server.collector.SnapshotCollector;
 import com.gamzacoding.jvm_Insight_server.domain.snapshot.Snapshot;
 import com.gamzacoding.jvm_Insight_server.domain.snapshot.SnapshotRepository;
 import com.gamzacoding.jvm_Insight_server.domain.target.Target;
@@ -19,13 +19,13 @@ public class SnapshotService {
 
     private final TargetRepository targetRepository;
     private final SnapshotRepository snapshotRepository;
-    private final SnapshotController controller = new SnapshotController();
+    private final SnapshotCollector collector;
 
     public Snapshot captureNow(Long targetId) {
         Target target = targetRepository.findById(targetId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "타겟을 찾을 수 없습니다."));
 
-        SnapshotController.Collected c = controller.collectFromCurrentJvm();
+        SnapshotCollector.Collected c = collector.collectFromCurrentJvm();
 
         Snapshot snapshot = Snapshot.of(
                 target,

@@ -21,6 +21,7 @@ public class Target {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // pid: Process Id(프로세스 식별자)
     @Column(nullable = false)
     private int pid;
 

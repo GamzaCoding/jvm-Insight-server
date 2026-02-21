@@ -1,4 +1,4 @@
-package com.gamzacoding.jvm_Insight_server.controller;
+package com.gamzacoding.jvm_Insight_server.collector;
 
 import java.lang.Thread.State;
 import java.lang.management.ManagementFactory;
@@ -9,8 +9,10 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.time.Instant;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
-public class SnapshotController {
+@Component
+public class SnapshotCollector {
 
     public Collected collectFromCurrentJvm() {
         Instant now = Instant.now();
