@@ -30,7 +30,8 @@ public class TargetController {
 
     @GetMapping
     public List<TargetResponse> list() {
-        return targetRepository.findAll().stream()
+        List<Target> targets = targetService.finaAll();
+        return targets.stream()
                 .map(TargetResponse::from)
                 .toList();
     }

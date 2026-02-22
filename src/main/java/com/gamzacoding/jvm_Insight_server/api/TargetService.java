@@ -2,6 +2,7 @@ package com.gamzacoding.jvm_Insight_server.api;
 
 import com.gamzacoding.jvm_Insight_server.domain.target.Target;
 import com.gamzacoding.jvm_Insight_server.domain.target.TargetRepository;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,5 +21,9 @@ public class TargetService {
         if (pid <= 0) {
             throw new IllegalArgumentException("Pid는 양수여야 합니다.");
         }
+    }
+
+    public List<Target> finaAll() {
+        return targetRepository.findAll();
     }
 }
