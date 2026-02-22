@@ -1,5 +1,6 @@
 package com.gamzacoding.jvm_Insight_server.collector;
 
+import com.gamzacoding.jvm_Insight_server.api.dto.Collected;
 import java.lang.Thread.State;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -61,11 +62,4 @@ public class SnapshotCollector {
                 runnable, blocked, waiting
         );
     }
-
-    public record Collected(
-            Instant capturedAt,
-            long heapUsed, long heapCommitted, long heapMax,
-            long metaUsed, long metaCommitted,
-            int threadCount, int runnableCount, int blockedCount, int waitingCount
-    ) {}
 }

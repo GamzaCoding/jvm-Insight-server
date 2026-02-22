@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class TargetController {
 
     private final TargetService targetService;
-    private final TargetRepository targetRepository;
 
     @PostMapping
     public TargetResponse creat(@Valid @RequestBody CreateTargetRequest request) {
