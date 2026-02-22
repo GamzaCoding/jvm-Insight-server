@@ -1,7 +1,6 @@
 package com.gamzacoding.jvm_Insight_server.api;
 
 import com.gamzacoding.jvm_Insight_server.domain.target.Target;
-import com.gamzacoding.jvm_Insight_server.domain.target.TargetRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
@@ -22,7 +21,7 @@ public class TargetController {
     private final TargetService targetService;
 
     @PostMapping
-    public TargetResponse creat(@Valid @RequestBody CreateTargetRequest request) {
+    public TargetResponse create(@Valid @RequestBody CreateTargetRequest request) {
         Target savedTarget = targetService.create(request.pid(), request.displayName());
         return TargetResponse.from(savedTarget);
     }

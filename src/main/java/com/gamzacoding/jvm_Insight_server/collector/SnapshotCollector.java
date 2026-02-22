@@ -18,24 +18,27 @@ public class SnapshotCollector {
     public Collected collectFromCurrentJvm() {
         Instant now = Instant.now();
 
+        // heap 멤모리 사용량 추출
         MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
         MemoryUsage heap = memoryMXBean.getHeapMemoryUsage();
 
         long metaUsed = 0L;
         long metaCommitted = 0L;
+        // 메타스페이스 사용량 추출
         List<MemoryPoolMXBean> pools = ManagementFactory.getMemoryPoolMXBeans();
         for (MemoryPoolMXBean pool : pools) {
             if ("Metaspace".equals(pool.getName())) {
-                MemoryUsage u = pool.getUsage();
-                metaUsed = u.getUsed();
-                metaCommitted = u.getCommitted();
+                MemoryUsage memoryUsage = pool.getUsage();
+                metaUsed = memoryUsage.getUsed();
+                metaCommitted = memoryUsage.getCommitted();
                 break;
             }
         }
 
+        // 스레스 목록/상태 추출
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-        long[] ids = threadMXBean.getAllThreadIds();
-        ThreadInfo[] infos = threadMXBean.getThreadInfo(ids);
+        long[] threadIds = threadMXBean.getAllThreadIds();
+        ThreadInfo[] infos = threadMXBean.getThreadInfo(threadIds);
 
         int runnable = 0;
         int blocked = 0;
