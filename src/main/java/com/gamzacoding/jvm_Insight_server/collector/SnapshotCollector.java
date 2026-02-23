@@ -10,43 +10,63 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SnapshotCollector {
 
+    public static final String METASPACE_POOL_NAME = "Metaspace";
+
     public Collected collectFromCurrentJvm() {
         Instant now = Instant.now();
+        HeapSnapshot heap = readHeap();
+        PoolSnapshot metaspace = readMemoryPool(METASPACE_POOL_NAME).orElse(PoolSnapshot.ZERO);
+        ThreadSnapshot threads = readThreadSnapshot();
 
-        // heap 멤모리 사용량 추출
+        return new Collected(
+                now,
+                heap.used(), heap.committed(), heap.max(),
+                metaspace.used(), metaspace.committed(),
+                threads.threadCount(),
+                threads.runnable(), threads.blocked(), threads.waiting()
+        );
+    }
+
+    private HeapSnapshot readHeap() {
         MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
         MemoryUsage heap = memoryMXBean.getHeapMemoryUsage();
+        return new HeapSnapshot(heap.getUsed(), heap.getCommitted(), heap.getMax());
+    }
 
-        long metaUsed = 0L;
-        long metaCommitted = 0L;
-        // 메타스페이스 사용량 추출
+    private Optional<PoolSnapshot> readMemoryPool(String poolName) {
         List<MemoryPoolMXBean> pools = ManagementFactory.getMemoryPoolMXBeans();
         for (MemoryPoolMXBean pool : pools) {
-            if ("Metaspace".equals(pool.getName())) {
-                MemoryUsage memoryUsage = pool.getUsage();
-                metaUsed = memoryUsage.getUsed();
-                metaCommitted = memoryUsage.getCommitted();
-                break;
+            if (poolName.equals(pool.getName())) {
+                MemoryUsage usage = pool.getUsage();
+                if (usage == null) {
+                    return Optional.empty();
+                }
+                return Optional.of(new PoolSnapshot(usage.getUsed(), usage.getCommitted()));
             }
         }
+        return Optional.empty();
+    }
 
-        // 스레스 목록/상태 추출
+    private ThreadSnapshot readThreadSnapshot() {
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-        long[] threadIds = threadMXBean.getAllThreadIds();
-        ThreadInfo[] infos = threadMXBean.getThreadInfo(threadIds);
+        long[] ids = threadMXBean.getAllThreadIds();
+        ThreadInfo[] threadInfos = threadMXBean.getThreadInfo(ids);
 
         int runnable = 0;
         int blocked = 0;
         int waiting = 0;
-        for (ThreadInfo info : infos) {
+
+        for (ThreadInfo info : threadInfos) {
             if (info == null) {
                 continue;
             }
+
             State threadState = info.getThreadState();
             if (threadState == State.RUNNABLE) {
                 runnable++;
@@ -56,13 +76,14 @@ public class SnapshotCollector {
                 waiting++;
             }
         }
-
-        return new Collected(
-                now,
-                heap.getUsed(), heap.getCommitted(), heap.getMax(),
-                metaUsed, metaCommitted,
-                threadMXBean.getThreadCount(),
-                runnable, blocked, waiting
-        );
+        return new ThreadSnapshot(threadMXBean.getThreadCount(), runnable, blocked, waiting);
     }
+
+    private record HeapSnapshot(long used, long committed, long max) {}
+
+    private record PoolSnapshot(long used, long committed) {
+        static final PoolSnapshot ZERO = new PoolSnapshot(0L, 0L);
+    }
+
+    private record ThreadSnapshot(int threadCount, int runnable, int blocked, int waiting) {}
 }
