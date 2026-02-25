@@ -2,6 +2,8 @@ package com.gamzacoding.jvm_Insight_server.api;
 
 import com.gamzacoding.jvm_Insight_server.domain.target.Target;
 import com.gamzacoding.jvm_Insight_server.domain.target.TargetRepository;
+import com.gamzacoding.jvm_Insight_server.error.ApiException;
+import com.gamzacoding.jvm_Insight_server.error.ErrorCode;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +21,7 @@ public class TargetService {
 
     private void validatePidPositive(int pid) {
         if (pid <= 0) {
-            throw new IllegalArgumentException("Pid는 양수여야 합니다.");
+            throw new ApiException(ErrorCode.PIP_NOT_NEGATIVE);
         }
     }
 

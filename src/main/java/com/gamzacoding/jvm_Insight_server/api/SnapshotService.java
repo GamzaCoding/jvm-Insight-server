@@ -6,13 +6,13 @@ import com.gamzacoding.jvm_Insight_server.domain.snapshot.Snapshot;
 import com.gamzacoding.jvm_Insight_server.domain.snapshot.SnapshotRepository;
 import com.gamzacoding.jvm_Insight_server.domain.target.Target;
 import com.gamzacoding.jvm_Insight_server.domain.target.TargetRepository;
+import com.gamzacoding.jvm_Insight_server.error.ApiException;
+import com.gamzacoding.jvm_Insight_server.error.ErrorCode;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @AllArgsConstructor
@@ -24,7 +24,7 @@ public class SnapshotService {
 
     public Snapshot captureNow(Long targetId) {
         Target target = targetRepository.findById(targetId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "타겟을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FIND_TARGET));
 
         Collected jvmCollected = collector.collectFromCurrentJvm();
 
